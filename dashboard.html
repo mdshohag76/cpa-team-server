@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CPA SHOHAG PRO TEAM</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace;}
+:root{--g:#00ff88;--r:#ff4444;--bg:#080000;--panel:#110000;--border:#2a0000;}
+body{background:var(--bg);color:#eee;min-height:100vh;}
+.header{background:#050000;border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.logo{font-size:14px;font-weight:bold;color:#fff;letter-spacing:1px;flex:1;}
+.logo span{color:var(--g);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g);box-shadow:0 0 6px var(--g);}
+.dot.off{background:#ff3333;box-shadow:none;}
+.conn-txt{font-size:10px;color:var(--g);}
+
+/* TABS */
+.tabs{display:flex;background:#0a0000;border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab-btn{padding:10px 16px;font-size:10px;letter-spacing:1.5px;color:#ff7777;cursor:pointer;border:none;background:none;font-family:inherit;white-space:nowrap;border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--g);border-bottom-color:var(--g);}
+.tab{display:none;padding:14px;}
+.tab.active{display:block;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+.sbox{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px;text-align:center;}
+.sbox .num{font-size:28px;font-weight:bold;}
+.sbox .lbl{font-size:8px;color:#ff7777;letter-spacing:1px;margin-top:3px;}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border:none;border-radius:3px;cursor:pointer;font-family:inherit;font-size:10px;font-weight:bold;letter-spacing:1px;}
+.btn-g{background:#002200;color:var(--g);border:1px solid #005500;}
+.btn-r{background:#220000;color:var(--r);border:1px solid #550000;}
+.btn-y{background:#1a1a00;color:#ffcc00;border:1px solid #444400;}
+.btn-b{background:#000033;color:#6699ff;border:1px solid #000066;}
+.btn:active{opacity:.7;}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+
+/* INPUT */
+.fi{background:#080000;border:1px solid #330000;color:#fff;padding:8px 10px;border-radius:3px;font-family:inherit;font-size:11px;outline:none;width:100%;}
+.fi:focus{border-color:var(--g);}
+.lbl{font-size:9px;color:#ff7777;letter-spacing:1px;margin-bottom:4px;display:block;}
+
+/* PC CARDS */
+.pc-card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;}
+.pc-card.online{border-color:#003300;}
+.pc-card.running{border-color:var(--g);}
+.pc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.pc-ico{font-size:20px;}
+.pc-name{font-size:11px;color:#fff;font-weight:bold;}
+.pc-ip{font-size:9px;color:#ff6666;}
+.pc-key{font-size:8px;color:#333;word-break:break-all;}
+.badge{display:inline-block;font-size:8px;padding:2px 7px;border-radius:8px;font-weight:bold;}
+.b-run{background:#003300;color:var(--g);}
+.b-idle{background:#1a1a00;color:#ffcc00;}
+.b-off{background:#111;color:#666;}
+.b-rev{background:#2a0000;color:#ff5555;}
+.pc-stats{font-size:9px;color:#ff7777;margin:6px 0;}
+.pc-stats b{color:#fff;}
+.pc-btns{display:flex;gap:5px;flex-wrap:wrap;}
+.pc-btn{flex:1;min-width:60px;padding:5px;border:none;border-radius:2px;cursor:pointer;font-family:inherit;font-size:9px;font-weight:bold;}
+
+/* LICENSE TABLE */
+.lic-item{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:8px;}
+.lic-key{font-size:10px;color:var(--g);font-family:'Courier New';word-break:break-all;margin-bottom:4px;cursor:pointer;}
+.lic-note{font-size:9px;color:#ff8888;}
+.lic-status{font-size:9px;margin:4px 0;}
+.lic-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+
+/* LOG */
+.log-box{background:#060000;border:1px solid var(--border);border-radius:4px;padding:8px;height:300px;overflow-y:auto;font-size:10px;}
+.log-line{padding:2px 0;border-bottom:1px solid #0a0000;color:#888;}
+.log-line.done{color:var(--g);}
+.log-line.err{color:var(--r);}
+.log-line.info{color:#ffcc00;}
+
+/* NEW KEY BOX */
+.new-key-box{background:#002200;border:1px solid #005500;border-radius:3px;padding:12px;margin-top:10px;display:none;}
+.new-key-val{color:var(--g);font-size:14px;font-weight:bold;word-break:break-all;cursor:pointer;}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#330000;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">CPA SHOHAG <span>PRO TEAM</span></div>
+  <div class="dot off" id="connDot"></div>
+  <div class="conn-txt" id="connTxt">Offline</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="goTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="goTab('pcs',this)">All PCs</button>
+  <button class="tab-btn" onclick="goTab('licenses',this)">Licenses</button>
+  <button class="tab-btn" onclick="goTab('logs',this)">Logs</button>
+</div>
+
+<!-- OVERVIEW -->
+<div class="tab active" id="tab-overview">
+  <div class="stats">
+    <div class="sbox"><div class="num" style="color:#ff8844;" id="stTotal">0</div><div class="lbl">TOTAL LICENSED</div></div>
+    <div class="sbox"><div class="num" style="color:var(--g);" id="stActive">0</div><div class="lbl">ACTIVE</div></div>
+    <div class="sbox"><div class="num" style="color:#44aaff;" id="stOnline">0</div><div class="lbl">ONLINE NOW</div></div>
+    <div class="sbox"><div class="num" style="color:#ffaa00;" id="stClicks">0</div><div class="lbl">TOTAL CLICKS</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-g" onclick="cmdAll('cmd-start')">▶ Start All</button>
+    <button class="btn btn-r" onclick="cmdAll('cmd-stop')">■ Stop All</button>
+    <button class="btn btn-y" onclick="loadData()">↻ Refresh</button>
+  </div>
+  <div id="overviewPCs"></div>
+</div>
+
+<!-- ALL PCs -->
+<div class="tab" id="tab-pcs">
+  <div class="btn-row">
+    <button class="btn btn-y" onclick="loadData()">↻ Refresh</button>
+  </div>
+  <div id="allPCs"></div>
+</div>
+
+<!-- LICENSES -->
+<div class="tab" id="tab-licenses">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:12px;">
+    <div class="lbl">NOTE (PC Name)</div>
+    <input class="fi" id="licNote" placeholder="Office-PC-1" style="margin-bottom:8px;">
+    <button class="btn btn-g" onclick="createKey()" style="width:100%;">+ Generate Key</button>
+    <div class="new-key-box" id="newKeyBox">
+      <div style="font-size:9px;color:#ff7777;margin-bottom:5px;">নতুন Key — ক্লিক করলে copy হবে:</div>
+      <div class="new-key-val" id="newKeyVal" onclick="copyTxt(this.textContent)"></div>
+    </div>
+  </div>
+  <div id="licList"></div>
+</div>
+
+<!-- LOGS -->
+<div class="tab" id="tab-logs">
+  <div class="btn-row">
+    <button class="btn btn-y" onclick="loadData()">↻ Refresh</button>
+    <button class="btn" style="background:#111;color:#666;border:1px solid #333;" onclick="document.getElementById('logBox').innerHTML=''">Clear</button>
+  </div>
+  <div class="log-box" id="logBox"><div style="color:#330000;padding:10px;">Bot log এখানে দেখাবে...</div></div>
+</div>
+
+<script>
+// Auto-detect server URL
+const BASE = window.location.origin;
+let pcData = [], licData = {}, logLines = [];
+
+function goTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ── Load data from server API ─────────────────────────────────
+async function loadData() {
+  try {
+    const r = await fetch(BASE + '/api/status');
+    const d = await r.json();
+    pcData  = d.online || [];
+    licData = d.licenses || {};
+    document.getElementById('connDot').className = 'dot';
+    document.getElementById('connTxt').textContent = 'Online';
+    renderAll();
+  } catch(e) {
+    document.getElementById('connDot').className = 'dot off';
+    document.getElementById('connTxt').textContent = 'Offline';
+  }
+}
+
+function renderAll() {
+  // Stats
+  const keys = Object.keys(licData);
+  const active = keys.filter(k => licData[k].active).length;
+  const clicks = keys.reduce((s,k) => s + (licData[k].totalClicks||0), 0);
+  document.getElementById('stTotal').textContent  = keys.length;
+  document.getElementById('stActive').textContent = active;
+  document.getElementById('stOnline').textContent = pcData.length;
+  document.getElementById('stClicks').textContent = clicks;
+
+  // PC cards
+  const pcHtml = pcData.length
+    ? pcData.map(p => pcCard(p)).join('')
+    : '<div style="text-align:center;color:#220000;padding:20px;font-size:11px;">Online PC নেই</div>';
+  document.getElementById('overviewPCs').innerHTML = pcHtml;
+  document.getElementById('allPCs').innerHTML = pcHtml;
+
+  // License list
+  renderLicenses();
+}
+
+function statusIcon(s) {
+  if(s==='running') return '🟢';
+  if(s==='idle')    return '💤';
+  return '⚫';
+}
+function statusBadge(s) {
+  if(s==='running') return '<span class="badge b-run">RUNNING</span>';
+  if(s==='idle')    return '<span class="badge b-idle">IDLE</span>';
+  return '<span class="badge b-off">OFFLINE</span>';
+}
+function timeSince(ts) {
+  if(!ts) return '?';
+  const s = Math.floor((Date.now()-ts)/1000);
+  if(s<60) return s+'s ago';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  return Math.floor(s/3600)+'h ago';
+}
+function pcCard(p) {
+  return `<div class="pc-card online ${p.status==='running'?'running':''}">
+    <div class="pc-top">
+      <div class="pc-ico">${statusIcon(p.status)}</div>
+      <div>
+        <div class="pc-name">${esc(p.name)}</div>
+        <div class="pc-ip">${esc(p.ip)}</div>
+        <div class="pc-key">${esc(p.licenseKey||'')}</div>
+        ${statusBadge(p.status)}
+      </div>
+    </div>
+    <div class="pc-stats">Clicks: <b>${p.clicks||0}</b> &nbsp; Sessions: <b>${p.sessions||0}</b></div>
+    <div class="pc-btns">
+      <button class="pc-btn" style="background:#002200;color:#00ff88;border:1px solid #004400;" onclick="cmdOne('cmd-start',${p.id})">▶ Start</button>
+      <button class="pc-btn" style="background:#220000;color:#ff5555;border:1px solid #440000;" onclick="cmdOne('cmd-stop',${p.id})">■ Stop</button>
+      <button class="pc-btn" style="background:#2a0000;color:#ff4444;border:1px solid #550000;" onclick="revokeKey('${p.licenseKey}')">✗ Revoke</button>
+    </div>
+  </div>`;
+}
+
+function renderLicenses() {
+  const keys = Object.keys(licData);
+  document.getElementById('licList').innerHTML = keys.length
+    ? keys.map(k => {
+        const l = licData[k];
+        return `<div class="lic-item">
+          <div class="lic-key" onclick="copyTxt('${k}')">${k}</div>
+          <div class="lic-note">${esc(l.note||'')} ${l.pcName?'('+esc(l.pcName)+')':''}</div>
+          <div class="lic-status" style="color:${l.active?'#00ff88':'#ff4444'};">${l.active?'✓ Active':'✗ Revoked'}</div>
+          <div style="font-size:9px;color:#333;">Clicks: ${l.totalClicks||0} | IP: ${esc(l.lastIp||'-')}</div>
+          <div class="lic-btns">
+            ${l.active
+              ? `<button class="btn btn-r" style="font-size:9px;padding:4px 10px;" onclick="revokeKey('${k}')">Revoke</button>`
+              : `<button class="btn btn-g" style="font-size:9px;padding:4px 10px;" onclick="restoreKey('${k}')">Restore</button>`}
+            <button class="btn btn-y" style="font-size:9px;padding:4px 10px;" onclick="resetHwid('${k}')">HWID Reset</button>
+            <button class="btn btn-r" style="font-size:9px;padding:4px 10px;background:#0d0000;" onclick="deleteKey('${k}')">Delete</button>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="text-align:center;color:#220000;padding:20px;">No licenses — Generate করো</div>';
+}
+
+// ── API calls ─────────────────────────────────────────────────
+async function api(url, body) {
+  const r = await fetch(BASE + url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  return r.json();
+}
+
+async function createKey() {
+  const note = document.getElementById('licNote').value.trim();
+  const d = await api('/api/create-key', { note });
+  if (d.ok) {
+    document.getElementById('newKeyVal').textContent = d.key;
+    document.getElementById('newKeyBox').style.display = 'block';
+    loadData();
+  }
+}
+async function revokeKey(key) {
+  if (!confirm('Revoke করবো?\n' + key)) return;
+  await api('/api/revoke', { key }); loadData();
+}
+async function restoreKey(key) { await api('/api/restore', { key }); loadData(); }
+async function deleteKey(key) {
+  if (!confirm('Delete করবো?\n' + key)) return;
+  await api('/api/delete', { key }); loadData();
+}
+async function resetHwid(key) {
+  if (!confirm('HWID reset?\n' + key)) return;
+  await api('/api/reset-hwid', { key }); loadData();
+}
+async function cmdOne(event, targetId) { await api('/api/cmd', { event, targetId }); }
+async function cmdAll(event) { await api('/api/cmd-all', { event }); }
+
+function copyTxt(t) {
+  navigator.clipboard.writeText(t).then(() => alert('Copied!\n' + t)).catch(() => {});
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Auto-refresh every 8s
+loadData();
+setInterval(loadData, 8000);
+</script>
+</body>
+</html>
