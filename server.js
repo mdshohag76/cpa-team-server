@@ -131,7 +131,7 @@ wss.on('connection', (ws, req) => {
         if (!db.licenses[key]) { ws.send(JSON.stringify({ event: 'activate-result', ok: false, msg: 'Invalid key!' })); break; }
         const lic = db.licenses[key];
         if (!lic.active) { ws.send(JSON.stringify({ event: 'activate-result', ok: false, msg: 'License বাতিল!' })); break; }
-        if (lic.hwid && lic.hwid !== msg.hwid) { ws.send(JSON.stringify({ event: 'activate-result', ok: false, msg: 'অন্য PC তে activate আছে!' })); break; }
+        
         lic.hwid = msg.hwid; lic.pcName = msg.pcName || c.name;
         lic.lastIp = ip; lic.lastSeen = Date.now();
         lic.activatedAt = lic.activatedAt || Date.now();
@@ -147,8 +147,7 @@ wss.on('connection', (ws, req) => {
         if (!key || !db.licenses[key]) { ws.send(JSON.stringify({ event: 'license-status', ok: false })); break; }
         const lic = db.licenses[key];
         if (!lic.active) { ws.send(JSON.stringify({ event: 'license-status', ok: false, revoked: true })); break; }
-        if (lic.hwid && lic.hwid !== msg.hwid) { ws.send(JSON.stringify({ event: 'license-status', ok: false })); break; }
-        lic.hwid = msg.hwid; lic.lastIp = ip; lic.lastSeen = Date.now();
+        lic.lastIp = ip; lic.lastSeen = Date.now();
         saveDB(db);
         c.licenseKey = key; c.name = lic.pcName || c.name;
         ws.send(JSON.stringify({ event: 'license-status', ok: true, pcName: c.name }));
